@@ -18,5 +18,11 @@ func (k msgServer) CreatePost(goCtx context.Context, msg *types.MsgCreatePost) (
 	}
 	id := k.AppendPost(ctx, post)
 
+	post.Id = id
+	err := ctx.EventManager().EmitTypedEvent(&post)
+	if err != nil {
+		return nil, err
+	}
+
 	return &types.MsgCreatePostResponse{Id: id}, nil
 }
