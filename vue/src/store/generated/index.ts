@@ -1,9 +1,11 @@
 // THIS FILE IS GENERATED AUTOMATICALLY. DO NOT MODIFY.
 
+import BlogAdmin from './blog.admin'
 import BlogBlog from './blog.blog'
 
 
 export default { 
+  BlogAdmin: load(BlogAdmin, 'blog.admin'),
   BlogBlog: load(BlogBlog, 'blog.blog'),
   
 }

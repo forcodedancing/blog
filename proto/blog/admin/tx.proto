@@ -1,0 +1,23 @@
+syntax = "proto3";
+package blog.admin;
+
+// this line is used by starport scaffolding # proto/tx/import
+
+option go_package = "blog/x/admin/types";
+
+// Msg defines the Msg service.
+service Msg {
+      rpc CreateAdmin(MsgCreateAdmin) returns (MsgCreateAdminResponse);
+// this line is used by starport scaffolding # proto/tx/rpc
+}
+
+message MsgCreateAdmin {
+  string creator = 1;
+  string title = 2;
+}
+
+message MsgCreateAdminResponse {
+   uint64 id = 1;
+}
+
+// this line is used by starport scaffolding # proto/tx/message

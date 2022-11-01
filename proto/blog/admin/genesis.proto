@@ -1,0 +1,14 @@
+syntax = "proto3";
+package blog.admin;
+
+import "gogoproto/gogo.proto";
+import "blog/admin/params.proto";
+// this line is used by starport scaffolding # genesis/proto/import
+
+option go_package = "blog/x/admin/types";
+
+// GenesisState defines the admin module's genesis state.
+message GenesisState {
+  Params params = 1 [(gogoproto.nullable) = false];
+  // this line is used by starport scaffolding # genesis/proto/state
+}

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"blog/app/upgrades/addstore"
 	"blog/app/upgrades/test1"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -106,6 +107,9 @@ import (
 	tmos "github.com/tendermint/tendermint/libs/os"
 	dbm "github.com/tendermint/tm-db"
 
+	adminmodule "blog/x/admin"
+	adminmodulekeeper "blog/x/admin/keeper"
+	adminmoduletypes "blog/x/admin/types"
 	blogmodule "blog/x/blog"
 	blogmodulekeeper "blog/x/blog/keeper"
 	blogmoduletypes "blog/x/blog/types"
@@ -168,6 +172,7 @@ var (
 		ica.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		blogmodule.AppModuleBasic{},
+		adminmodule.AppModuleBasic{},
 		// this line is used by starport scaffolding # stargate/app/moduleBasic
 	)
 
@@ -242,6 +247,8 @@ type App struct {
 	ScopedICAHostKeeper  capabilitykeeper.ScopedKeeper
 
 	BlogKeeper blogmodulekeeper.Keeper
+
+	AdminKeeper adminmodulekeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// mm is the module manager
@@ -287,6 +294,7 @@ func New(
 		ibctransfertypes.StoreKey, icahosttypes.StoreKey, capabilitytypes.StoreKey, group.StoreKey,
 		icacontrollertypes.StoreKey,
 		blogmoduletypes.StoreKey,
+		adminmoduletypes.StoreKey,
 		// this line is used by starport scaffolding # stargate/app/storeKey
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
@@ -512,6 +520,14 @@ func New(
 	)
 	blogModule := blogmodule.NewAppModule(appCodec, app.BlogKeeper, app.AccountKeeper, app.BankKeeper)
 
+	app.AdminKeeper = *adminmodulekeeper.NewKeeper(
+		appCodec,
+		keys[adminmoduletypes.StoreKey],
+		keys[adminmoduletypes.MemStoreKey],
+		app.GetSubspace(adminmoduletypes.ModuleName),
+	)
+	adminModule := adminmodule.NewAppModule(appCodec, app.AdminKeeper, app.AccountKeeper, app.BankKeeper)
+
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
 
 	// Sealing prevents other modules from creating scoped sub-keepers
@@ -558,6 +574,7 @@ func New(
 		transferModule,
 		icaModule,
 		blogModule,
+		adminModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 
@@ -588,6 +605,7 @@ func New(
 		paramstypes.ModuleName,
 		vestingtypes.ModuleName,
 		blogmoduletypes.ModuleName,
+		adminmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/beginBlockers
 	)
 
@@ -613,6 +631,7 @@ func New(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		blogmoduletypes.ModuleName,
+		adminmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/endBlockers
 	)
 
@@ -643,6 +662,7 @@ func New(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		blogmoduletypes.ModuleName,
+		adminmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	)
 
@@ -673,6 +693,7 @@ func New(
 		ibc.NewAppModule(app.IBCKeeper),
 		transferModule,
 		blogModule,
+		adminModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 	app.sm.RegisterStoreDecoders()
@@ -875,6 +896,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(icacontrollertypes.SubModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
 	paramsKeeper.Subspace(blogmoduletypes.ModuleName)
+	paramsKeeper.Subspace(adminmoduletypes.ModuleName)
 	// this line is used by starport scaffolding # stargate/app/paramSubspace
 
 	return paramsKeeper
@@ -891,4 +913,37 @@ func (app *App) SetUpgradeHandlers() {
 		test1.UpgradeName,
 		test1.CreateUpgradeHandler(app.mm, app.configurator),
 	)
+
+	//addstore upgrade does nothing
+	app.UpgradeKeeper.SetUpgradeHandler(
+		addstore.UpgradeName,
+		addstore.CreateUpgradeHandler(app.mm, app.configurator),
+	)
+
+	// When a planned update height is reached, the old binary will panic
+	// writing on disk the height and name of the update that triggered it
+	// This will read that value, and execute the preparations for the upgrade.
+	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
+	if err != nil {
+		panic(fmt.Errorf("failed to read upgrade info from disk: %w", err))
+	}
+
+	if app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+		return
+	}
+
+	var storeUpgrades *storetypes.StoreUpgrades
+
+	switch upgradeInfo.Name {
+	case test1.UpgradeName:
+		// no store upgrades in test1
+	case addstore.UpgradeName:
+		storeUpgrades = &storetypes.StoreUpgrades{
+			Added: []string{adminmoduletypes.ModuleName},
+		}
+	}
+	if storeUpgrades != nil {
+		// configure store loader that checks if version == upgradeHeight and applies store upgrades
+		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, storeUpgrades))
+	}
 }

@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package blog.admin;
+
+option go_package = "blog/x/admin/types";
+
+message Admin {
+  string creator = 1;
+  uint64 id = 2;
+  string title = 3;
+}

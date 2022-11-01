@@ -1,4 +1,4 @@
-package test1
+package addstore
 
 import (
 	"fmt"
@@ -8,12 +8,14 @@ import (
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 )
 
-// CreateUpgradeHandler creates an SDK upgrade handler for test1
+// CreateUpgradeHandler creates an SDK upgrade handler for addstore
 func CreateUpgradeHandler(
 	mm *module.Manager,
 	configurator module.Configurator,
 ) upgradetypes.UpgradeHandler {
 	return func(ctx sdk.Context, _ upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
+		logger := ctx.Logger().With("upgrade", UpgradeName)
+		logger.Debug("running module migrations ...")
 		for k, v := range vm {
 			fmt.Printf("k %x, v%x \n", k, v)
 		}
