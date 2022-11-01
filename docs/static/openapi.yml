@@ -26,6 +26,8 @@ paths:
                       format: uint64
                     title:
                       type: string
+                    gender:
+                      type: string
               pagination:
                 type: object
                 properties:
@@ -45388,6 +45390,8 @@ definitions:
         format: uint64
       title:
         type: string
+      gender:
+        type: string
   blog.admin.MsgCreateAdminResponse:
     type: object
     properties:
@@ -45411,6 +45415,8 @@ definitions:
               type: string
               format: uint64
             title:
+              type: string
+            gender:
               type: string
       pagination:
         type: object

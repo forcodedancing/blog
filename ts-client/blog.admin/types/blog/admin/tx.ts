@@ -7,6 +7,7 @@ export const protobufPackage = "blog.admin";
 export interface MsgCreateAdmin {
   creator: string;
   title: string;
+  gender: string;
 }
 
 export interface MsgCreateAdminResponse {
@@ -14,7 +15,7 @@ export interface MsgCreateAdminResponse {
 }
 
 function createBaseMsgCreateAdmin(): MsgCreateAdmin {
-  return { creator: "", title: "" };
+  return { creator: "", title: "", gender: "" };
 }
 
 export const MsgCreateAdmin = {
@@ -24,6 +25,9 @@ export const MsgCreateAdmin = {
     }
     if (message.title !== "") {
       writer.uint32(18).string(message.title);
+    }
+    if (message.gender !== "") {
+      writer.uint32(26).string(message.gender);
     }
     return writer;
   },
@@ -41,6 +45,9 @@ export const MsgCreateAdmin = {
         case 2:
           message.title = reader.string();
           break;
+        case 3:
+          message.gender = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -53,6 +60,7 @@ export const MsgCreateAdmin = {
     return {
       creator: isSet(object.creator) ? String(object.creator) : "",
       title: isSet(object.title) ? String(object.title) : "",
+      gender: isSet(object.gender) ? String(object.gender) : "",
     };
   },
 
@@ -60,6 +68,7 @@ export const MsgCreateAdmin = {
     const obj: any = {};
     message.creator !== undefined && (obj.creator = message.creator);
     message.title !== undefined && (obj.title = message.title);
+    message.gender !== undefined && (obj.gender = message.gender);
     return obj;
   },
 
@@ -67,6 +76,7 @@ export const MsgCreateAdmin = {
     const message = createBaseMsgCreateAdmin();
     message.creator = object.creator ?? "";
     message.title = object.title ?? "";
+    message.gender = object.gender ?? "";
     return message;
   },
 };

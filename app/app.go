@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"blog/app/upgrades/addstore"
+	"blog/app/upgrades/schemachange"
 	"blog/app/upgrades/test1"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -914,10 +915,16 @@ func (app *App) SetUpgradeHandlers() {
 		test1.CreateUpgradeHandler(app.mm, app.configurator),
 	)
 
-	//addstore upgrade does nothing
+	//addstore upgrade adds new store
 	app.UpgradeKeeper.SetUpgradeHandler(
 		addstore.UpgradeName,
 		addstore.CreateUpgradeHandler(app.mm, app.configurator),
+	)
+
+	//schemachange upgrade existed schema
+	app.UpgradeKeeper.SetUpgradeHandler(
+		schemachange.UpgradeName,
+		schemachange.CreateUpgradeHandler(app.mm, app.configurator),
 	)
 
 	// When a planned update height is reached, the old binary will panic
@@ -941,6 +948,8 @@ func (app *App) SetUpgradeHandlers() {
 		storeUpgrades = &storetypes.StoreUpgrades{
 			Added: []string{adminmoduletypes.ModuleName},
 		}
+	case schemachange.UpgradeName:
+
 	}
 	if storeUpgrades != nil {
 		// configure store loader that checks if version == upgradeHeight and applies store upgrades

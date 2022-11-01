@@ -14,6 +14,7 @@ func (k msgServer) CreateAdmin(goCtx context.Context, msg *types.MsgCreateAdmin)
 	var post = types.Admin{
 		Creator: msg.Creator,
 		Title:   msg.Title,
+		Gender:  msg.Gender,
 	}
 	id := k.AppendAdmin(ctx, post)
 

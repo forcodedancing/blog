@@ -15,6 +15,7 @@ export interface AdminAdmin {
   /** @format uint64 */
   id?: string;
   title?: string;
+  gender?: string;
 }
 
 export interface AdminMsgCreateAdminResponse {

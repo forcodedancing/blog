@@ -9,10 +9,11 @@ const TypeMsgCreateAdmin = "create_admin"
 
 var _ sdk.Msg = &MsgCreateAdmin{}
 
-func NewMsgCreateAdmin(creator string, title string) *MsgCreateAdmin {
+func NewMsgCreateAdmin(creator string, title string, gender string) *MsgCreateAdmin {
 	return &MsgCreateAdmin{
 		Creator: creator,
 		Title:   title,
+		Gender:  gender,
 	}
 }
 

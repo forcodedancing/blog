@@ -8,4 +8,5 @@ message Admin {
   string creator = 1;
   uint64 id = 2;
   string title = 3;
+  string gender = 4;
 }

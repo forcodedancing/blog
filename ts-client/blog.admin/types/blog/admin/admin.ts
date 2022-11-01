@@ -8,10 +8,11 @@ export interface Admin {
   creator: string;
   id: number;
   title: string;
+  gender: string;
 }
 
 function createBaseAdmin(): Admin {
-  return { creator: "", id: 0, title: "" };
+  return { creator: "", id: 0, title: "", gender: "" };
 }
 
 export const Admin = {
@@ -24,6 +25,9 @@ export const Admin = {
     }
     if (message.title !== "") {
       writer.uint32(26).string(message.title);
+    }
+    if (message.gender !== "") {
+      writer.uint32(34).string(message.gender);
     }
     return writer;
   },
@@ -44,6 +48,9 @@ export const Admin = {
         case 3:
           message.title = reader.string();
           break;
+        case 4:
+          message.gender = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -57,6 +64,7 @@ export const Admin = {
       creator: isSet(object.creator) ? String(object.creator) : "",
       id: isSet(object.id) ? Number(object.id) : 0,
       title: isSet(object.title) ? String(object.title) : "",
+      gender: isSet(object.gender) ? String(object.gender) : "",
     };
   },
 
@@ -65,6 +73,7 @@ export const Admin = {
     message.creator !== undefined && (obj.creator = message.creator);
     message.id !== undefined && (obj.id = Math.round(message.id));
     message.title !== undefined && (obj.title = message.title);
+    message.gender !== undefined && (obj.gender = message.gender);
     return obj;
   },
 
@@ -73,6 +82,7 @@ export const Admin = {
     message.creator = object.creator ?? "";
     message.id = object.id ?? 0;
     message.title = object.title ?? "";
+    message.gender = object.gender ?? "";
     return message;
   },
 };
