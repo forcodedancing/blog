@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"blog/app/upgrades/test1"
+
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
@@ -701,6 +703,9 @@ func New(
 	app.SetInitChainer(app.InitChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
+	// setupUpgradeHandlers should be called before `LoadLatestVersion()`
+	// because StoreLoad is sealed after that
+	app.SetUpgradeHandlers()
 
 	if loadLatest {
 		if err := app.LoadLatestVersion(); err != nil {
@@ -878,4 +883,12 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 // SimulationManager implements the SimulationApp interface
 func (app *App) SimulationManager() *module.SimulationManager {
 	return app.sm
+}
+
+func (app *App) SetUpgradeHandlers() {
+	//test1 upgrade does nothing
+	app.UpgradeKeeper.SetUpgradeHandler(
+		test1.UpgradeName,
+		test1.CreateUpgradeHandler(app.mm, app.configurator),
+	)
 }
